@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — Pássaro Professor</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #070707;
+  --surface: #0f0f0f;
+  --surface2: #141414;
+  --surface3: #1a1a1a;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
+  --text: #f2f2f2;
+  --text-mid: #8a8a8a;
+  --text-soft: #444;
+  --gold: #D4AF37;
+  --gold-dim: rgba(212,175,55,0.1);
+  --gold-border: rgba(212,175,55,0.25);
+  --green: #4ade80;
+  --red: #f87171;
+  --blue: #60a5fa;
+}
+html, body { height: 100%; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+/* LOGIN */
+#login-page {
+  min-height: 100dvh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%; max-width: 380px;
+  text-align: center;
+}
+.login-card .brand {
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text-mid); margin-bottom: 32px;
+}
+.login-card .brand span { color: var(--gold); }
+.login-card h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+.login-card p { font-size: 0.82rem; color: var(--text-mid); margin-bottom: 28px; }
+.login-card input {
+  width: 100%; padding: 14px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text);
+  font-family: inherit; font-size: 0.95rem;
+  outline: none; margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+.login-card input:focus { border-color: var(--gold-border); }
+.btn-gold {
+  width: 100%; padding: 14px;
+  background: var(--gold); color: #000;
+  font-family: inherit; font-size: 0.95rem; font-weight: 800;
+  border: none; border-radius: 100px; cursor: pointer;
+  transition: all 0.25s;
+}
+.btn-gold:hover { background: #e8c84a; }
+.btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+.login-error { color: var(--red); font-size: 0.8rem; margin-top: 12px; min-height: 20px; }
+
+/* APP SHELL */
+#app { display: none; flex: 1; flex-direction: column; }
+.topbar {
+  height: 60px; background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 24px; gap: 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-brand { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-mid); }
+.topbar-brand span { color: var(--gold); }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.btn-sm {
+  padding: 7px 14px;
+  background: var(--surface3); border: 1px solid var(--border);
+  color: var(--text-mid); font-family: inherit; font-size: 0.75rem;
+  font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+}
+.btn-sm:hover { border-color: var(--border-strong); color: var(--text); }
+.btn-sm.danger:hover { border-color: rgba(248,113,113,0.4); color: var(--red); }
+
+/* LAYOUT */
+.layout { display: flex; flex: 1; min-height: 0; }
+.sidebar {
+  width: 200px; flex-shrink: 0;
+  background: var(--surface); border-right: 1px solid var(--border);
+  padding: 20px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: 0.82rem; font-weight: 600; color: var(--text-mid);
+  cursor: pointer; transition: all 0.2s; border: none; background: none;
+  width: 100%; text-align: left;
+}
+.nav-item:hover { background: var(--surface3); color: var(--text); }
+.nav-item.active { background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold-border); }
+.nav-icon { font-size: 1rem; }
+.main-content { flex: 1; overflow-y: auto; padding: 32px; }
+
+/* TABS */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-soft);
+  margin-bottom: 20px;
+}
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px;
+}
+.stat-label { font-size: 0.7rem; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
+.stat-val { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; font-family: 'Space Mono', monospace; }
+.stat-val.gold { color: var(--gold); }
+.stat-val.green { color: var(--green); }
+
+/* CHART */
+.chart-wrap { height: 120px; display: flex; align-items: flex-end; gap: 4px; }
+.bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bar { width: 100%; background: var(--gold-dim); border: 1px solid var(--gold-border); border-radius: 4px; min-height: 4px; transition: all 0.3s; }
+.bar-label { font-size: 0.55rem; color: var(--text-soft); }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 0.75rem; font-weight: 600; color: var(--text-mid); }
+.field input, .field textarea, .field select {
+  padding: 11px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text);
+  font-family: inherit; font-size: 0.88rem;
+  outline: none; transition: border-color 0.2s;
+}
+.field input:focus, .field textarea:focus { border-color: var(--gold-border); }
+.field textarea { min-height: 80px; resize: vertical; }
+.field-hint { font-size: 0.7rem; color: var(--text-soft); }
+.field-group-title {
+  grid-column: 1/-1;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-soft);
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+/* SAVE BAR */
+.save-bar {
+  position: sticky; bottom: 0; margin: 20px -32px -32px;
+  background: var(--surface2); border-top: 1px solid var(--border);
+  padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+}
+.save-status { font-size: 0.8rem; color: var(--text-mid); }
+.save-status.saved { color: var(--green); }
+.save-status.saving { color: var(--gold); }
+.btn-save {
+  padding: 11px 28px;
+  background: var(--gold); color: #000;
+  font-family: inherit; font-size: 0.88rem; font-weight: 800;
+  border: none; border-radius: 100px; cursor: pointer;
+  transition: all 0.25s;
+}
+.btn-save:hover { background: #e8c84a; }
+.btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ORDERS TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+th { padding: 10px 12px; text-align: left; color: var(--text-soft); font-weight: 600; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-mid); }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 100px;
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+}
+.badge.approved { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+.badge.pending  { background: rgba(212,175,55,0.12);  color: var(--gold);  border: 1px solid var(--gold-border); }
+.badge.rejected { background: rgba(248,113,113,0.12); color: var(--red);   border: 1px solid rgba(248,113,113,0.25); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: #222; border: 1px solid var(--border);
+  border-radius: 100px; padding: 10px 22px;
+  font-size: 0.8rem; color: var(--text); z-index: 999;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+.toast.ok { border-color: rgba(74,222,128,0.4); color: var(--green); }
+.toast.err { border-color: rgba(248,113,113,0.4); color: var(--red); }
+
+@media (max-width: 720px) {
+  .sidebar { display: none; }
+  .main-content { padding: 20px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="brand">Pássaro <span>Professor</span></div>
+    <h2>Painel Admin</h2>
+    <p>Entre com sua senha para acessar</p>
+    <input type="password" id="lp-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-gold" id="lp-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="lp-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">Pássaro <span>Professor</span> <span style="color:var(--text-soft)"> · Admin</span></div>
+    <div class="topbar-right">
+      <div class="status-dot" title="Online"></div>
+      <a href="/" target="_blank" class="btn-sm">Ver site ↗</a>
+      <button class="btn-sm danger" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="layout">
+    <nav class="sidebar">
+      <button class="nav-item active" data-tab="dashboard" onclick="switchTab(this)"><span class="nav-icon">📊</span> Dashboard</button>
+      <button class="nav-item" data-tab="conteudo" onclick="switchTab(this)"><span class="nav-icon">✏️</span> Conteúdo</button>
+      <button class="nav-item" data-tab="pedidos" onclick="switchTab(this)"><span class="nav-icon">🛒</span> Pedidos</button>
+      <button class="nav-item" data-tab="seo" onclick="switchTab(this)"><span class="nav-icon">🔍</span> SEO</button>
+      <button class="nav-item" data-tab="integ" onclick="switchTab(this)"><span class="nav-icon">⚙️</span> Integrações</button>
+      <button class="nav-item" data-tab="acesso" onclick="switchTab(this)"><span class="nav-icon">🔒</span> Acesso</button>
+    </nav>
+
+    <main class="main-content">
+
+      <!-- DASHBOARD -->
+      <div class="tab-panel active" id="tab-dashboard">
+        <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:24px;">Dashboard</h2>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Visitas hoje</div><div class="stat-val gold" id="st-today">—</div></div>
+          <div class="stat-card"><div class="stat-label">Visitas total</div><div class="stat-val" id="st-total">—</div></div>
+          <div class="stat-card"><div class="stat-label">Pedidos</div><div class="stat-val" id="st-orders">—</div></div>
+          <div class="stat-card"><div class="stat-label">Vendas (aprovadas)</div><div class="stat-val green" id="st-paid">—</div></div>
+          <div class="stat-card"><div class="stat-label">Receita</div><div class="stat-val gold" id="st-revenue">—</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Visitas — últimos 7 dias</div>
+          <div class="chart-wrap" id="chart-7d"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Origens de tráfego</div>
+          <div id="sources-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+
+      <!-- CONTEÚDO -->
+      <div class="tab-panel" id="tab-conteudo">
+        <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:24px;">Conteúdo da página</h2>
+        <div class="card">
+          <div class="form-grid" id="form-conteudo">
+            <div class="field-group-title">Produto</div>
+            <div class="field"><label>Nome do produto</label><input type="text" data-key="product_name"></div>
+            <div class="field"><label>Subtítulo</label><input type="text" data-key="product_subtitle"></div>
+            <div class="field" style="grid-column:1/-1"><label>Descrição</label><textarea data-key="product_description"></textarea></div>
+
+            <div class="field-group-title">Preço e oferta</div>
+            <div class="field"><label>Preço atual (R$)</label><input type="number" step="0.01" data-key="price"></div>
+            <div class="field"><label>Preço original (R$)</label><input type="number" step="0.01" data-key="price_original"></div>
+            <div class="field"><label>Desconto (%)</label><input type="number" data-key="discount_percent"></div>
+            <div class="field"><label>Badge da oferta</label><input type="text" data-key="hero_badge"></div>
+            <div class="field"><label>Texto do botão CTA</label><input type="text" data-key="cta_text"></div>
+            <div class="field"><label>Subtexto abaixo do CTA</label><input type="text" data-key="cta_sub"></div>
+            <div class="field" style="grid-column:1/-1"><label>Texto de garantia</label><input type="text" data-key="guarantee_text"></div>
+
+            <div class="field-group-title">Features (4 itens)</div>
+            <div class="field"><label>Feature 1 — Ícone</label><input type="text" data-key="feature_1_icon" placeholder="emoji"></div>
+            <div class="field"><label>Feature 1 — Título</label><input type="text" data-key="feature_1_title"></div>
+            <div class="field" style="grid-column:1/-1"><label>Feature 1 — Descrição</label><input type="text" data-key="feature_1_desc"></div>
+            <div class="field"><label>Feature 2 — Ícone</label><input type="text" data-key="feature_2_icon" placeholder="emoji"></div>
+            <div class="field"><label>Feature 2 — Título</label><input type="text" data-key="feature_2_title"></div>
+            <div class="field" style="grid-column:1/-1"><label>Feature 2 — Descrição</label><input type="text" data-key="feature_2_desc"></div>
+            <div class="field"><label>Feature 3 — Ícone</label><input type="text" data-key="feature_3_icon" placeholder="emoji"></div>
+            <div class="field"><label>Feature 3 — Título</label><input type="text" data-key="feature_3_title"></div>
+            <div class="field" style="grid-column:1/-1"><label>Feature 3 — Descrição</label><input type="text" data-key="feature_3_desc"></div>
+            <div class="field"><label>Feature 4 — Ícone</label><input type="text" data-key="feature_4_icon" placeholder="emoji"></div>
+            <div class="field"><label>Feature 4 — Título</label><input type="text" data-key="feature_4_title"></div>
+            <div class="field" style="grid-column:1/-1"><label>Feature 4 — Descrição</label><input type="text" data-key="feature_4_desc"></div>
+
+            <div class="field-group-title">Rodapé</div>
+            <div class="field" style="grid-column:1/-1"><label>Texto do rodapé</label><input type="text" data-key="footer_text"></div>
+            <div class="field"><label>WhatsApp (com DDD)</label><input type="text" data-key="whatsapp_number" placeholder="5511999999999"></div>
+          </div>
+        </div>
+        <div class="save-bar">
+          <span class="save-status" id="save-status-conteudo">Não salvo</span>
+          <button class="btn-save" onclick="saveTab('conteudo')">💾 Salvar alterações</button>
+        </div>
+      </div>
+
+      <!-- PEDIDOS -->
+      <div class="tab-panel" id="tab-pedidos">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <h2 style="font-size:1.3rem;font-weight:800;">Pedidos</h2>
+          <button class="btn-sm" onclick="loadOrders()">↻ Atualizar</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Valor</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody">
+                <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-soft);">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEO -->
+      <div class="tab-panel" id="tab-seo">
+        <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:24px;">SEO & Meta tags</h2>
+        <div class="card">
+          <div class="form-grid">
+            <div class="field-group-title">Meta tags</div>
+            <div class="field" style="grid-column:1/-1"><label>Title (tag &lt;title&gt;)</label><input type="text" data-key="site_title"><div class="field-hint">Ideal: até 60 caracteres</div></div>
+            <div class="field" style="grid-column:1/-1"><label>Meta description</label><textarea data-key="site_description"></textarea><div class="field-hint">Ideal: 140–160 caracteres</div></div>
+
+            <div class="field-group-title">Open Graph (redes sociais)</div>
+            <div class="field" style="grid-column:1/-1"><label>OG Title</label><input type="text" data-key="og_title"></div>
+            <div class="field" style="grid-column:1/-1"><label>OG Description</label><textarea data-key="og_description"></textarea></div>
+            <div class="field" style="grid-column:1/-1"><label>OG Image URL</label><input type="url" data-key="og_image" placeholder="https://..."><div class="field-hint">Tamanho recomendado: 1200×630 px</div></div>
+
+            <div class="field-group-title">Analytics & Pixel</div>
+            <div class="field"><label>Google Analytics ID (G-XXXXXXX)</label><input type="text" data-key="gtag_id" placeholder="G-XXXXXXXXXX"></div>
+            <div class="field"><label>Meta Pixel ID</label><input type="text" data-key="pixel_id" placeholder="000000000000000"></div>
+          </div>
+        </div>
+        <div class="save-bar">
+          <span class="save-status" id="save-status-seo">Não salvo</span>
+          <button class="btn-save" onclick="saveTab('seo')">💾 Salvar SEO</button>
+        </div>
+      </div>
+
+      <!-- INTEGRAÇÕES -->
+      <div class="tab-panel" id="tab-integ">
+        <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:24px;">Integrações</h2>
+        <div class="card">
+          <div class="card-title">Mercado Pago</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Public Key (frontend)</label>
+              <input type="text" data-key="mp_public_key" placeholder="APP_USR-...">
+              <div class="field-hint">Usada no formulário de pagamento do cliente</div>
+            </div>
+            <div class="field">
+              <label>Access Token (backend)</label>
+              <input type="password" id="mp-access-token-input" placeholder="APP_USR-...">
+              <div class="field-hint">Chave secreta — nunca exposta ao cliente</div>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:12px;">
+            <button class="btn-sm" onclick="saveMPKeys()">Salvar chaves MP</button>
+            <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" class="btn-sm">Abrir painel MP ↗</a>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <div class="card-title">Webhook URL</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <input type="text" style="flex:1;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text-mid);font-size:0.8rem;" id="webhook-url" readonly>
+            <button class="btn-sm" onclick="copyWebhook()">Copiar</button>
+          </div>
+          <p style="font-size:0.72rem;color:var(--text-soft);margin-top:10px;">Configure esta URL no painel do Mercado Pago em Aplicações → IPN/Webhook</p>
+        </div>
+      </div>
+
+      <!-- ACESSO -->
+      <div class="tab-panel" id="tab-acesso">
+        <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:24px;">Segurança</h2>
+        <div class="card">
+          <div class="card-title">Alterar senha do admin</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Nova senha</label>
+              <input type="password" id="new-pwd" placeholder="Mínimo 8 caracteres">
+            </div>
+            <div class="field">
+              <label>Confirmar senha</label>
+              <input type="password" id="confirm-pwd" placeholder="Repita a senha">
+            </div>
+          </div>
+          <button class="btn-sm" style="margin-top:16px;" onclick="changePassword()">Alterar senha</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ────────────────────────────────────────────────
+let token = localStorage.getItem('pp_admin_token') || '';
+let cfgCache = {};
+
+// ── Auth ─────────────────────────────────────────────────
+async function doLogin() {
+  const pwd = document.getElementById('lp-input').value;
+  const btn = document.getElementById('lp-btn');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try {
+    const r = await api('POST', '/admin/api/login', { password: pwd }, false);
+    token = r.token;
+    localStorage.setItem('pp_admin_token', token);
+    showApp();
+  } catch(e) {
+    document.getElementById('lp-error').textContent = e.message || 'Senha incorreta';
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('pp_admin_token');
+  location.reload();
+}
+
+function showApp() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('app').style.flexDirection = 'column';
+  // Set webhook URL
+  document.getElementById('webhook-url').value = location.origin + '/api/checkout/webhook';
+  loadAnalytics();
+  loadConfig();
+}
+
+// Init
+if (token) { verifyToken(); } else { document.getElementById('login-page').style.display = 'flex'; }
+
+async function verifyToken() {
+  try {
+    await api('GET', '/admin/api/config');
+    showApp();
+  } catch {
+    token = ''; localStorage.removeItem('pp_admin_token');
+  }
+}
+
+// ── API helper ───────────────────────────────────────────
+async function api(method, path, body, auth = true) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (auth) headers['Authorization'] = 'Bearer ' + token;
+  const r = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Erro ' + r.status);
+  return data;
+}
+
+// ── Navigation ───────────────────────────────────────────
+function switchTab(btn) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const tab = btn.dataset.tab;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'pedidos') loadOrders();
+}
+
+// ── Config ───────────────────────────────────────────────
+async function loadConfig() {
+  try {
+    cfgCache = await api('GET', '/admin/api/config');
+    // Populate all inputs
+    document.querySelectorAll('[data-key]').forEach(el => {
+      const v = cfgCache[el.dataset.key];
+      if (v !== undefined) el.value = v;
+    });
+  } catch(e) { showToast('Erro ao carregar config: ' + e.message, 'err'); }
+}
+
+async function saveTab(tab) {
+  const statusEl = document.getElementById('save-status-' + tab);
+  statusEl.textContent = 'Salvando...'; statusEl.className = 'save-status saving';
+  const payload = {};
+  document.querySelectorAll('#tab-' + tab + ' [data-key], #tab-conteudo [data-key]').forEach(el => {
+    payload[el.dataset.key] = el.value;
+  });
+  // For seo tab, also collect those fields
+  if (tab === 'seo') {
+    document.querySelectorAll('#tab-seo [data-key]').forEach(el => { payload[el.dataset.key] = el.value; });
+  }
+  try {
+    await api('PUT', '/admin/api/config', payload);
+    statusEl.textContent = '✓ Salvo'; statusEl.className = 'save-status saved';
+    showToast('Alterações salvas!', 'ok');
+    setTimeout(() => { statusEl.textContent = 'Salvo'; }, 3000);
+  } catch(e) {
+    statusEl.textContent = 'Erro'; statusEl.className = 'save-status';
+    showToast('Erro: ' + e.message, 'err');
+  }
+}
+
+async function saveMPKeys() {
+  const pubKey = document.querySelector('[data-key="mp_public_key"]').value;
+  const accToken = document.getElementById('mp-access-token-input').value;
+  try {
+    if (pubKey) await api('PUT', '/admin/api/config', { mp_public_key: pubKey });
+    if (accToken) await api('PUT', '/admin/api/mp-token', { access_token: accToken });
+    showToast('Chaves MP salvas!', 'ok');
+  } catch(e) { showToast('Erro: ' + e.message, 'err'); }
+}
+
+// ── Orders ────────────────────────────────────────────────
+async function loadOrders() {
+  const tbody = document.getElementById('orders-tbody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-soft);">Carregando...</td></tr>';
+  try {
+    const orders = await api('GET', '/admin/api/orders');
+    if (!orders.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-soft);">Nenhum pedido ainda</td></tr>';
+      return;
+    }
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td style="color:var(--text-soft);font-family:monospace;">#${o.id}</td>
+        <td style="color:var(--text);">${esc(o.customer_name || '—')}</td>
+        <td>${esc(o.customer_email || '—')}</td>
+        <td style="font-family:monospace;color:var(--gold);">R$${(+o.amount||0).toFixed(2)}</td>
+        <td><span class="badge ${o.status}">${o.status}</span></td>
+        <td>${new Date(o.created_at).toLocaleDateString('pt-BR')}</td>
+      </tr>`).join('');
+  } catch(e) { tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red);text-align:center;padding:24px;">${e.message}</td></tr>`; }
+}
+
+// ── Analytics ─────────────────────────────────────────────
+async function loadAnalytics() {
+  try {
+    const d = await api('GET', '/admin/api/analytics');
+    setText('st-today', d.todayViews);
+    setText('st-total', d.totalViews);
+    setText('st-orders', d.totalOrders);
+    setText('st-paid', d.paidOrders);
+    setText('st-revenue', 'R$' + (+d.revenue||0).toFixed(2).replace('.', ','));
+
+    // 7-day chart
+    const chart = document.getElementById('chart-7d');
+    if (d.last7 && d.last7.length) {
+      const max = Math.max(...d.last7.map(x=>x.count), 1);
+      chart.innerHTML = d.last7.map(row => {
+        const h = Math.max(8, Math.round((row.count / max) * 100));
+        const label = row.date.slice(5); // MM-DD
+        return `<div class="bar-item"><div class="bar" style="height:${h}px" title="${row.count} visitas em ${row.date}"></div><div class="bar-label">${label}</div></div>`;
+      }).join('');
+    } else {
+      chart.innerHTML = '<p style="color:var(--text-soft);font-size:0.8rem;">Sem dados ainda</p>';
+    }
+
+    // Sources
+    const src = document.getElementById('sources-list');
+    if (d.sources && d.sources.length) {
+      const total = d.sources.reduce((a,s)=>a+s.count,0);
+      src.innerHTML = d.sources.map(s => `
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="flex:1;font-size:0.8rem;color:var(--text-mid)">${esc(s.source)}</div>
+          <div style="width:120px;height:4px;background:var(--surface3);border-radius:100px;overflow:hidden;">
+            <div style="height:100%;width:${Math.round(s.count/total*100)}%;background:var(--gold);border-radius:100px;"></div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-soft);font-family:monospace;min-width:30px;text-align:right">${s.count}</div>
+        </div>`).join('');
+    } else {
+      src.innerHTML = '<p style="font-size:0.8rem;color:var(--text-soft);">Sem dados de origem ainda</p>';
+    }
+  } catch(e) { console.warn(e); }
+}
+
+// ── Password ──────────────────────────────────────────────
+async function changePassword() {
+  const p1 = document.getElementById('new-pwd').value;
+  const p2 = document.getElementById('confirm-pwd').value;
+  if (p1.length < 8) return showToast('Senha muito curta (mín. 8 caracteres)', 'err');
+  if (p1 !== p2) return showToast('Senhas não coincidem', 'err');
+  try {
+    await api('PUT', '/admin/api/password', { password: p1 });
+    showToast('Senha alterada!', 'ok');
+    document.getElementById('new-pwd').value = '';
+    document.getElementById('confirm-pwd').value = '';
+  } catch(e) { showToast('Erro: ' + e.message, 'err'); }
+}
+
+// ── Utils ─────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function setText(id, v) { const el=document.getElementById(id); if(el) el.textContent = v; }
+function copyWebhook() {
+  navigator.clipboard.writeText(document.getElementById('webhook-url').value);
+  showToast('URL copiada!', 'ok');
+}
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(()=>t.className='toast', 3000);
+}
+</script>
+</body>
+</html>
