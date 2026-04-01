@@ -26,6 +26,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'", "https://api.mercadopago.com", "https://www.google-analytics.com"],
       frameSrc: ["https://www.mercadopago.com.br", "https://www.mercadopago.com"],
+      scriptSrcAttr: ["'unsafe-inline'"],
     },
   },
 }));
