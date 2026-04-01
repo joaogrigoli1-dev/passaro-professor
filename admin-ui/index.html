@@ -193,6 +193,38 @@ body {
 .btn-save:hover { background: #e8c84a; }
 .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ANÁLISE */
+.analise-2col { grid-template-columns: 1fr 1fr; }
+@media (max-width: 700px) { .analise-2col { grid-template-columns: 1fr; } }
+.score-pill {
+  display:inline-flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:50%;font-size:0.82rem;font-weight:800;
+}
+.score-pill.green { background:rgba(74,222,128,.15);color:var(--green); }
+.score-pill.yellow { background:rgba(251,191,36,.15);color:#fbbf24; }
+.score-pill.red { background:rgba(248,113,113,.15);color:var(--red); }
+.seo-row {
+  display:flex;align-items:flex-start;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--border);font-size:0.82rem;
+}
+.seo-row:last-child { border-bottom:none; }
+.status-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px; }
+.status-dot.ok { background:var(--green); }
+.status-dot.atencao { background:#fbbf24; }
+.status-dot.critico { background:var(--red); }
+.impact-tag {
+  font-size:0.68rem;padding:1px 7px;border-radius:10px;font-weight:700;white-space:nowrap;
+}
+.impact-tag.alto { background:rgba(248,113,113,.15);color:var(--red); }
+.impact-tag.medio { background:rgba(251,191,36,.15);color:#fbbf24; }
+.impact-tag.baixo { background:rgba(74,222,128,.15);color:var(--green); }
+.priority-tag {
+  font-size:0.68rem;padding:1px 7px;border-radius:10px;font-weight:700;white-space:nowrap;
+}
+.priority-tag.alta { background:rgba(248,113,113,.15);color:var(--red); }
+.priority-tag.media { background:rgba(251,191,36,.15);color:#fbbf24; }
+.priority-tag.baixa { background:rgba(74,222,128,.15);color:var(--green); }
+
 /* UPLOAD */
 #upload-drop-zone.drag-over {
   border-color: var(--gold);
@@ -307,6 +339,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <button class="nav-item active" data-tab="dashboard" onclick="switchTab(this)"><span class="nav-icon">📊</span> Dashboard</button>
       <button class="nav-item" data-tab="conteudo" onclick="switchTab(this)"><span class="nav-icon">✏️</span> Conteúdo</button>
       <button class="nav-item" data-tab="imagens" onclick="switchTab(this)"><span class="nav-icon">🖼️</span> Imagens</button>
+      <button class="nav-item" data-tab="analise" onclick="switchTab(this)"><span class="nav-icon">🔬</span> Análise IA</button>
       <button class="nav-item" data-tab="pedidos" onclick="switchTab(this)"><span class="nav-icon">🛒</span> Pedidos</button>
       <button class="nav-item" data-tab="seo" onclick="switchTab(this)"><span class="nav-icon">🔍</span> SEO</button>
       <button class="nav-item" data-tab="integ" onclick="switchTab(this)"><span class="nav-icon">⚙️</span> Integrações</button>
@@ -376,6 +409,94 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <div class="save-bar">
           <span class="save-status" id="save-status-conteudo">Não salvo</span>
           <button class="btn-save" onclick="saveTab('conteudo')">💾 Salvar alterações</button>
+        </div>
+      </div>
+
+      <!-- ANÁLISE IA -->
+      <div class="tab-panel" id="tab-analise">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <h2 style="font-size:1.3rem;font-weight:800;">Análise IA do site</h2>
+          <button class="btn-sm" id="btn-run-analise" onclick="runAnalise()">▶ Rodar análise</button>
+        </div>
+        <p style="color:var(--text-mid);font-size:0.83rem;margin-bottom:24px;">Analisa performance (Google PageSpeed), SEO técnico e gera recomendações com IA. Leva ~20 segundos.</p>
+
+        <div id="analise-loading" style="display:none;padding:40px;text-align:center;color:var(--text-mid);">
+          <div style="font-size:2rem;margin-bottom:12px;">⏳</div>
+          <div id="analise-loading-msg">Rodando análise…</div>
+          <div style="margin-top:10px;height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;max-width:300px;margin:12px auto 0;">
+            <div id="analise-bar" style="height:100%;background:var(--gold);width:0%;transition:width 1s linear;"></div>
+          </div>
+        </div>
+
+        <div id="analise-result" style="display:none;">
+
+          <!-- SCORES PAGESPEED -->
+          <div class="stats-grid" id="ps-scores" style="margin-bottom:20px;"></div>
+
+          <!-- MÉTRICAS WEB VITALS -->
+          <div class="card" id="ps-metrics-card" style="margin-bottom:20px;">
+            <div class="card-title">⚡ Core Web Vitals (mobile)</div>
+            <div id="ps-metrics" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px;"></div>
+          </div>
+
+          <!-- RESUMO IA -->
+          <div class="card" id="ai-resumo-card" style="margin-bottom:20px;">
+            <div class="card-title">🤖 Diagnóstico IA</div>
+            <div style="display:flex;align-items:center;gap:16px;margin:12px 0;">
+              <div id="ai-nota" style="width:64px;height:64px;border-radius:50%;border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:var(--gold);flex-shrink:0;">—</div>
+              <p id="ai-resumo-text" style="color:var(--text-mid);font-size:0.88rem;line-height:1.6;"></p>
+            </div>
+          </div>
+
+          <!-- GRID: PONTOS + PROBLEMAS -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;" class="analise-2col">
+            <div class="card">
+              <div class="card-title">✅ Pontos fortes</div>
+              <ul id="ai-fortes" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;list-style:none;"></ul>
+            </div>
+            <div class="card">
+              <div class="card-title">🚨 Problemas críticos</div>
+              <div id="ai-criticos" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;"></div>
+            </div>
+          </div>
+
+          <!-- SEO TÉCNICO -->
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-title">🔍 SEO técnico</div>
+            <div id="ai-seo" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+
+          <!-- MARKETING DIGITAL -->
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-title">📣 Marketing digital</div>
+            <div id="ai-marketing" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+
+          <!-- RANKING -->
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-title">📈 Ranking em buscadores</div>
+            <div id="ai-ranking" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+
+          <!-- PRÓXIMOS PASSOS -->
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-title">🗺️ Próximos passos (por prioridade)</div>
+            <ol id="ai-passos" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;padding-left:20px;"></ol>
+          </div>
+
+          <!-- LINKS GOOGLE -->
+          <div class="card">
+            <div class="card-title">🔗 Ferramentas Google</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;">
+              <a href="https://analytics.google.com" target="_blank" class="btn-sm">📊 Google Analytics</a>
+              <a href="https://search.google.com/search-console" target="_blank" class="btn-sm">🔍 Search Console</a>
+              <a href="https://pagespeed.web.dev/?url=https://passaroprofessor.com.br" target="_blank" class="btn-sm">⚡ PageSpeed Insights</a>
+              <a href="https://tagmanager.google.com" target="_blank" class="btn-sm">🏷️ Tag Manager</a>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-soft);margin-top:10px;">Configure o GA4 ID na aba SEO para ativar o rastreamento completo.</p>
+          </div>
+
+          <div id="analise-ts" style="font-size:0.72rem;color:var(--text-soft);margin-top:12px;text-align:right;"></div>
         </div>
       </div>
 
@@ -586,6 +707,7 @@ function switchTab(btn) {
   document.getElementById('tab-' + tab).classList.add('active');
   if (tab === 'pedidos') loadOrders();
   if (tab === 'imagens') loadGallery();
+  if (tab === 'analise') { /* não auto-roda — usuário clica */ }
 }
 
 // ── Config ───────────────────────────────────────────────
@@ -720,6 +842,148 @@ function showToast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + type;
   setTimeout(()=>t.className='toast', 3000);
+}
+
+// ── ANÁLISE IA ───────────────────────────────────────────────────────────────
+async function runAnalise() {
+  const btn = document.getElementById('btn-run-analise');
+  const loading = document.getElementById('analise-loading');
+  const result = document.getElementById('analise-result');
+  const bar = document.getElementById('analise-bar');
+  const msg = document.getElementById('analise-loading-msg');
+
+  btn.disabled = true;
+  result.style.display = 'none';
+  loading.style.display = 'block';
+  bar.style.width = '0%';
+
+  const steps = [
+    [1000, 15, 'Conectando ao Google PageSpeed…'],
+    [4000, 40, 'Analisando performance e SEO técnico…'],
+    [8000, 65, 'Coletando dados do site…'],
+    [13000, 82, 'IA gerando recomendações…'],
+    [18000, 95, 'Finalizando relatório…'],
+  ];
+  steps.forEach(([delay, pct, text]) => {
+    setTimeout(() => { bar.style.width = pct + '%'; msg.textContent = text; }, delay);
+  });
+
+  try {
+    const data = await api('GET', '/admin/api/analise');
+    bar.style.width = '100%';
+    setTimeout(() => {
+      loading.style.display = 'none';
+      renderAnalise(data);
+      result.style.display = 'block';
+      btn.disabled = false;
+    }, 400);
+  } catch (err) {
+    loading.style.display = 'none';
+    result.style.display = 'block';
+    result.innerHTML = `<div class="card" style="color:var(--red);">Erro: ${err.message}</div>`;
+    btn.disabled = false;
+  }
+}
+
+function scoreColor(s) {
+  if (s >= 90) return 'green';
+  if (s >= 50) return 'yellow';
+  return 'red';
+}
+
+function renderAnalise(data) {
+  const ps = data.page_speed || {};
+  const ai = data.ai_report || {};
+
+  // Scores
+  const scoreLabels = { performance: 'Performance', seo: 'SEO', accessibility: 'Acessib.', best_practices: 'Boas Práticas' };
+  const scoreIcons = { performance: '⚡', seo: '🔍', accessibility: '♿', best_practices: '✅' };
+  document.getElementById('ps-scores').innerHTML = Object.entries(ps.scores || {}).map(([k, v]) => `
+    <div class="stat-card" style="text-align:center;">
+      <div class="stat-label">${scoreIcons[k] || ''} ${scoreLabels[k] || k}</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px;">
+        <div class="score-pill ${scoreColor(v)}">${v}</div>
+        <div style="font-size:0.75rem;color:var(--text-soft);">${v >= 90 ? 'Ótimo' : v >= 50 ? 'Regular' : 'Ruim'}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Métricas
+  const metricLabels = { fcp: 'FCP', lcp: 'LCP', tbt: 'TBT', cls: 'CLS', speed_index: 'Speed Index', tti: 'TTI' };
+  document.getElementById('ps-metrics').innerHTML = Object.entries(ps.metrics || {}).map(([k, v]) => `
+    <div style="background:var(--surface3);border-radius:8px;padding:10px 14px;">
+      <div style="font-size:0.7rem;color:var(--text-soft);margin-bottom:4px;">${metricLabels[k] || k}</div>
+      <div style="font-weight:700;font-size:0.95rem;">${v}</div>
+    </div>
+  `).join('');
+
+  // Resumo e nota
+  document.getElementById('ai-nota').textContent = ai.nota_geral ?? '—';
+  const notaEl = document.getElementById('ai-nota');
+  const nota = ai.nota_geral || 0;
+  notaEl.style.borderColor = nota >= 7 ? 'var(--green)' : nota >= 5 ? '#fbbf24' : 'var(--red)';
+  notaEl.style.color = nota >= 7 ? 'var(--green)' : nota >= 5 ? '#fbbf24' : 'var(--red)';
+  document.getElementById('ai-resumo-text').textContent = ai.resumo || '—';
+
+  // Pontos fortes
+  document.getElementById('ai-fortes').innerHTML = (ai.pontos_fortes || []).map(p => `
+    <li style="display:flex;gap:8px;font-size:0.83rem;color:var(--text-mid);">
+      <span style="color:var(--green);flex-shrink:0;">✓</span>${p}
+    </li>
+  `).join('') || '<li style="color:var(--text-soft);font-size:0.82rem;">—</li>';
+
+  // Problemas críticos
+  document.getElementById('ai-criticos').innerHTML = (ai.problemas_criticos || []).map(p => `
+    <div style="background:var(--surface3);border-radius:8px;padding:10px 12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-weight:700;font-size:0.83rem;">${p.titulo}</span>
+        <span class="impact-tag ${p.impacto || 'medio'}">${p.impacto || '—'}</span>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-mid);">${p.solucao}</div>
+    </div>
+  `).join('') || '<div style="color:var(--text-soft);font-size:0.82rem;">Nenhum crítico identificado 🎉</div>';
+
+  // SEO técnico
+  document.getElementById('ai-seo').innerHTML = (ai.seo_tecnico || []).map(s => `
+    <div class="seo-row">
+      <div class="status-dot ${s.status || 'atencao'}"></div>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:0.83rem;">${s.item}</div>
+        <div style="color:var(--text-soft);font-size:0.77rem;margin-top:2px;">${s.detalhe}</div>
+      </div>
+    </div>
+  `).join('') || '<div style="color:var(--text-soft);font-size:0.82rem;">—</div>';
+
+  // Marketing digital
+  document.getElementById('ai-marketing').innerHTML = (ai.marketing_digital || []).map(m => `
+    <div style="background:var(--surface3);border-radius:8px;padding:10px 12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-weight:700;font-size:0.83rem;">${m.acao}</span>
+        <span class="priority-tag ${m.prioridade || 'media'}">${m.prioridade || '—'}</span>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-mid);">${m.descricao}</div>
+    </div>
+  `).join('') || '<div style="color:var(--text-soft);font-size:0.82rem;">—</div>';
+
+  // Ranking
+  document.getElementById('ai-ranking').innerHTML = (ai.ranking_buscadores || []).map(r => `
+    <div class="seo-row">
+      <span style="color:var(--gold);flex-shrink:0;">→</span>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:0.83rem;">${r.sugestao}</div>
+        <div style="color:var(--text-soft);font-size:0.77rem;margin-top:2px;">${r.impacto_esperado}</div>
+      </div>
+    </div>
+  `).join('') || '<div style="color:var(--text-soft);font-size:0.82rem;">—</div>';
+
+  // Próximos passos
+  document.getElementById('ai-passos').innerHTML = (ai.proximos_passos || []).map(p => `
+    <li style="font-size:0.83rem;color:var(--text-mid);padding:4px 0;">${p}</li>
+  `).join('') || '<li style="color:var(--text-soft);font-size:0.82rem;">—</li>';
+
+  // Timestamp
+  const ts = new Date(data.generated_at);
+  document.getElementById('analise-ts').textContent = `Gerado em ${ts.toLocaleDateString('pt-BR')} às ${ts.toLocaleTimeString('pt-BR')}`;
 }
 
 // ── UPLOAD & GALERIA ─────────────────────────────────────────────────────────
