@@ -193,6 +193,55 @@ body {
 .btn-save:hover { background: #e8c84a; }
 .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* UPLOAD */
+#upload-drop-zone.drag-over {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+}
+.upload-item {
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface2);border-radius:8px;padding:10px 14px;
+}
+.upload-item .up-thumb {
+  width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0;
+  background:var(--surface3);
+}
+.upload-item .up-info { flex:1;min-width:0; }
+.upload-item .up-name { font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.upload-item .up-status { font-size:0.75rem;color:var(--text-mid);margin-top:2px; }
+.upload-item .up-bar-wrap { height:4px;background:var(--surface3);border-radius:2px;margin-top:6px;overflow:hidden; }
+.upload-item .up-bar { height:100%;border-radius:2px;background:var(--gold);width:0%;transition:width .3s; }
+.up-badge { font-size:0.7rem;padding:2px 8px;border-radius:20px;font-weight:700;flex-shrink:0; }
+.up-badge.ok { background:rgba(74,222,128,.15);color:var(--green); }
+.up-badge.err { background:rgba(248,113,113,.15);color:var(--red); }
+.up-badge.proc { background:var(--gold-dim);color:var(--gold); }
+
+/* GALLERY */
+.img-card {
+  background:var(--surface2);border-radius:10px;overflow:hidden;
+  border:1px solid var(--border);transition:border-color .2s;
+}
+.img-card:hover { border-color:var(--border-strong); }
+.img-card img {
+  width:100%;aspect-ratio:1;object-fit:cover;display:block;
+  background:var(--surface3);
+}
+.img-card .img-actions {
+  padding:10px;display:flex;gap:6px;flex-wrap:wrap;
+}
+.img-card .img-info {
+  padding:0 10px 8px;font-size:0.72rem;color:var(--text-soft);
+}
+.img-btn {
+  flex:1;padding:5px 8px;font-size:0.72rem;font-weight:700;border-radius:6px;
+  border:1px solid var(--border);background:transparent;color:var(--text-mid);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.img-btn:hover { border-color:var(--border-strong);color:var(--text); }
+.img-btn.primary { border-color:var(--gold-border);color:var(--gold); }
+.img-btn.primary:hover { background:var(--gold-dim); }
+.img-btn.danger:hover { border-color:rgba(248,113,113,.4);color:var(--red); }
+
 /* ORDERS TABLE */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
@@ -257,6 +306,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <nav class="sidebar">
       <button class="nav-item active" data-tab="dashboard" onclick="switchTab(this)"><span class="nav-icon">📊</span> Dashboard</button>
       <button class="nav-item" data-tab="conteudo" onclick="switchTab(this)"><span class="nav-icon">✏️</span> Conteúdo</button>
+      <button class="nav-item" data-tab="imagens" onclick="switchTab(this)"><span class="nav-icon">🖼️</span> Imagens</button>
       <button class="nav-item" data-tab="pedidos" onclick="switchTab(this)"><span class="nav-icon">🛒</span> Pedidos</button>
       <button class="nav-item" data-tab="seo" onclick="switchTab(this)"><span class="nav-icon">🔍</span> SEO</button>
       <button class="nav-item" data-tab="integ" onclick="switchTab(this)"><span class="nav-icon">⚙️</span> Integrações</button>
@@ -326,6 +376,37 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <div class="save-bar">
           <span class="save-status" id="save-status-conteudo">Não salvo</span>
           <button class="btn-save" onclick="saveTab('conteudo')">💾 Salvar alterações</button>
+        </div>
+      </div>
+
+      <!-- IMAGENS -->
+      <div class="tab-panel" id="tab-imagens">
+        <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:8px;">Imagens do produto</h2>
+        <p style="color:var(--text-mid);font-size:0.83rem;margin-bottom:24px;">Faça upload de imagens — o sistema processa automaticamente: converte para WebP, otimiza compressão, corrige orientação e aplica melhora visual sutil.</p>
+
+        <!-- UPLOAD ZONE -->
+        <div class="card" style="margin-bottom:20px;">
+          <div id="upload-drop-zone"
+               style="border:2px dashed var(--border-strong);border-radius:12px;padding:40px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;">
+            <div id="upload-icon" style="font-size:2.4rem;margin-bottom:12px;">📁</div>
+            <div style="font-weight:700;font-size:1rem;margin-bottom:6px;">Arraste imagens aqui ou clique para selecionar</div>
+            <div style="color:var(--text-mid);font-size:0.8rem;">JPG, PNG, WebP, GIF · até 20 MB por arquivo · múltiplas imagens</div>
+            <input type="file" id="upload-input" multiple accept="image/*"
+                   style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+          </div>
+
+          <!-- FILA DE PROCESSAMENTO -->
+          <div id="upload-queue" style="margin-top:16px;display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+
+        <!-- GALERIA -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-weight:700;font-size:0.95rem;">Galeria de imagens</div>
+          <button class="btn-sm" onclick="loadGallery()">↻ Atualizar</button>
+        </div>
+        <div id="img-gallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;"></div>
+        <div id="gallery-empty" style="display:none;padding:48px;text-align:center;color:var(--text-soft);font-size:0.85rem;border:1px dashed var(--border);border-radius:12px;">
+          Nenhuma imagem ainda. Faça upload acima.
         </div>
       </div>
 
@@ -504,6 +585,7 @@ function switchTab(btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   if (tab === 'pedidos') loadOrders();
+  if (tab === 'imagens') loadGallery();
 }
 
 // ── Config ───────────────────────────────────────────────
@@ -638,6 +720,174 @@ function showToast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + type;
   setTimeout(()=>t.className='toast', 3000);
+}
+
+// ── UPLOAD & GALERIA ─────────────────────────────────────────────────────────
+(function initUpload() {
+  const zone = document.getElementById('upload-drop-zone');
+  const input = document.getElementById('upload-input');
+  if (!zone || !input) return;
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+  input.addEventListener('change', () => {
+    handleFiles(input.files);
+    input.value = '';
+  });
+})();
+
+function handleFiles(fileList) {
+  const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+  if (!files.length) return;
+  files.forEach(f => uploadFile(f));
+}
+
+async function uploadFile(file) {
+  const queue = document.getElementById('upload-queue');
+  const id = 'up_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+
+  // Cria item na fila
+  const item = document.createElement('div');
+  item.className = 'upload-item';
+  item.id = id;
+  item.innerHTML = `
+    <div class="up-thumb" style="background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">⏳</div>
+    <div class="up-info">
+      <div class="up-name">${file.name}</div>
+      <div class="up-status">Preparando…</div>
+      <div class="up-bar-wrap"><div class="up-bar" id="${id}_bar"></div></div>
+    </div>
+    <span class="up-badge proc">Processando</span>
+  `;
+  queue.prepend(item);
+
+  const setStatus = (msg) => { const el = item.querySelector('.up-status'); if (el) el.textContent = msg; };
+  const setBar = (pct) => { const el = document.getElementById(id + '_bar'); if (el) el.style.width = pct + '%'; };
+  const setBadge = (cls, txt) => {
+    const el = item.querySelector('.up-badge');
+    if (el) { el.className = 'up-badge ' + cls; el.textContent = txt; }
+  };
+
+  try {
+    // Preview local (original)
+    const previewUrl = URL.createObjectURL(file);
+    item.querySelector('.up-thumb').outerHTML = `<img class="up-thumb" src="${previewUrl}">`;
+
+    setStatus(`Enviando ${(file.size / 1024).toFixed(0)} KB…`);
+    setBar(20);
+
+    const formData = new FormData();
+    formData.append('images', file);
+
+    setBar(50);
+    const r = await fetch('/admin/api/upload', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token },
+      body: formData,
+    });
+    setBar(80);
+
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({ error: 'Erro desconhecido' }));
+      throw new Error(err.error || r.statusText);
+    }
+
+    const data = await r.json();
+    const img = data.images[0];
+    setBar(100);
+
+    const kb = (n) => (n / 1024).toFixed(0) + ' KB';
+    const gain = img.compression > 0
+      ? `▼${img.compression}% (${kb(img.original_size)} → ${kb(img.processed_size)})`
+      : kb(img.processed_size);
+    setStatus(`✅ Processado — ${img.width}×${img.height}px · WebP · ${gain}`);
+    setBadge('ok', 'Pronto');
+
+    // Atualiza thumb com imagem processada
+    const thumbEl = item.querySelector('.up-thumb') || item.querySelector('img.up-thumb');
+    if (thumbEl) thumbEl.src = img.thumb_url + '?t=' + Date.now();
+
+    // Adiciona botão copiar URL
+    const info = item.querySelector('.up-info');
+    if (info) {
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'img-btn primary';
+      copyBtn.style.cssText = 'font-size:0.72rem;padding:4px 10px;margin-top:6px;border-radius:6px;border:1px solid var(--gold-border);background:transparent;color:var(--gold);cursor:pointer;';
+      copyBtn.textContent = '📋 Copiar URL';
+      copyBtn.onclick = () => {
+        navigator.clipboard.writeText(window.location.origin + img.url);
+        showToast('URL copiada!');
+      };
+      info.appendChild(copyBtn);
+    }
+
+    // Recarrega galeria
+    loadGallery();
+
+  } catch (err) {
+    setStatus('❌ ' + err.message);
+    setBadge('err', 'Erro');
+    setBar(0);
+  }
+}
+
+async function loadGallery() {
+  const gallery = document.getElementById('img-gallery');
+  const empty = document.getElementById('gallery-empty');
+  if (!gallery) return;
+
+  try {
+    const images = await api('GET', '/admin/api/images');
+    if (!images.length) {
+      gallery.innerHTML = '';
+      gallery.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+    gallery.style.display = 'grid';
+    empty.style.display = 'none';
+
+    gallery.innerHTML = images.map(img => {
+      const kb = (img.size / 1024).toFixed(0);
+      const date = new Date(img.created_at).toLocaleDateString('pt-BR');
+      return `
+        <div class="img-card">
+          <img src="${img.thumb_url}?t=${img.created_at}" alt="${img.filename}" loading="lazy"
+               onerror="this.src='${img.url}'">
+          <div class="img-actions">
+            <button class="img-btn primary" onclick="copyImgUrl('${img.url}')">📋 Copiar URL</button>
+            <button class="img-btn danger" onclick="deleteImg('${img.filename}', this)">🗑️</button>
+          </div>
+          <div class="img-info">${kb} KB · ${date}</div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    gallery.innerHTML = `<p style="color:var(--red);font-size:0.8rem;">Erro ao carregar galeria: ${err.message}</p>`;
+  }
+}
+
+function copyImgUrl(url) {
+  navigator.clipboard.writeText(window.location.origin + url);
+  showToast('URL copiada!');
+}
+
+async function deleteImg(filename, btn) {
+  if (!confirm('Excluir esta imagem?')) return;
+  btn.disabled = true;
+  try {
+    await api('DELETE', '/admin/api/images/' + encodeURIComponent(filename));
+    showToast('Imagem excluída');
+    loadGallery();
+  } catch (err) {
+    showToast('Erro: ' + err.message);
+    btn.disabled = false;
+  }
 }
 </script>
 </body>

@@ -55,6 +55,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/', require('./src/routes/public'));
 app.use('/admin', require('./src/routes/admin'));
+app.use('/admin', require('./src/routes/upload'));
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
