@@ -59,7 +59,7 @@ router.post('/api/checkout/create', async (req, res) => {
       body: {
         items: [{
           id:          'radio-a1088',
-          title:       cfg.product_name || 'Rádio A-1088',
+          title:       cfg.product_name || 'Pássaro Professor',
           description: cfg.product_subtitle || 'Pássaro Professor',
           quantity:    1,
           unit_price:  price,
@@ -85,7 +85,7 @@ router.post('/api/checkout/create', async (req, res) => {
       customer_email:   email,
       customer_phone:   phone || '',
       amount:           price,
-      product_title:    cfg.product_name || 'Rádio A-1088',
+      product_title:    cfg.product_name || 'Pássaro Professor',
       raw_data:         JSON.stringify(result),
     });
 

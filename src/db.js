@@ -46,7 +46,7 @@ db.exec(`
 
 // Default config seed
 const defaults = {
-  product_name:        'Rádio A-1088',
+  product_name:        'Pássaro Professor',
   product_subtitle:    'Edição Especial Pássaro Professor',
   product_description: 'Rádio exclusivo com design único da linha Pássaro Professor. Tecnologia de áudio premium, recepção AM/FM de alta fidelidade e visualização 360° interativa. Edição limitada colecionável.',
   price:               '349.99',
@@ -68,9 +68,9 @@ const defaults = {
   feature_4_title:     'Design Exclusivo',
   feature_4_desc:      'Identidade visual Pássaro Professor com acabamento premium e cores vibrantes',
   guarantee_text:      '7 dias de garantia de satisfação ou seu dinheiro de volta',
-  site_title:          'Rádio A-1088 — Pássaro Professor | Edição Especial 61% OFF',
+  site_title:          'Pássaro Professor | Edição Especial 61% OFF',
   site_description:    'Rádio exclusivo Pássaro Professor com design colecionável, áudio de alta fidelidade e visualização 360° interativa. De R$897,41 por apenas R$349,99. Frete grátis.',
-  og_title:            'Rádio A-1088 — 61% OFF | Pássaro Professor',
+  og_title:            '61% OFF | Pássaro Professor',
   og_description:      'Edição especial com design exclusivo, áudio premium e visualização 360°. De R$897,41 por R$349,99.',
   og_image:            '',
   gtag_id:             '',

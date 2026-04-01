@@ -1,7 +1,7 @@
 {
   "name": "passaro-professor",
   "version": "1.0.0",
-  "description": "Landing page Rádio A-1088 — Pássaro Professor",
+  "description": "Landing page Pássaro Professor",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
